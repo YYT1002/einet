@@ -1312,7 +1312,8 @@ def find_epsilon_mapping(reach, core, order, G_micro, depth=4,
 
     for eps in epsilon_range:
 
-        labs_e = cluster_optics_dbscan(reach, core, order, eps)
+        # labs_e = cluster_optics_dbscan(reach, core, order, eps)
+        labs_e = cluster_optics_dbscan(reachability=reach, core_distances=core, ordering=order, eps=eps)
 
         macro_mapping_e = {i: i if lab == -1 else (len(labs_e)+lab)
                            for i, lab in enumerate(labs_e)}
