@@ -14,6 +14,9 @@ import numpy as np
 import networkx as nx
 from scipy.stats import entropy
 
+from scipy.sparse import csr_matrix
+
+
 
 def check_network(G):
     """
@@ -32,7 +35,11 @@ def check_network(G):
 
     if type(G) == np.ndarray:
         G = nx.from_numpy_array(G, create_using=nx.DiGraph())
+    
+    if isinstance(G, csr_matrix):
+        G = nx.from_scipy_sparse_array(G, create_using=nx.DiGraph())
 
+    
     if type(G) == nx.classes.graph.Graph:
         G = nx.DiGraph(G)
 
@@ -207,6 +214,10 @@ def effective_information(G):
     # if there are no nodes with outgoing edges, the EI = 0.0
     else:
         return 0.0
+
+def effectiveness(G):
+    G = check_network(G)
+    return effective_information(G) / np.log2(G.number_of_nodes())
 
 
 def effect_information_i(G, node_i=[], intervention_distribution='Hmax'):
