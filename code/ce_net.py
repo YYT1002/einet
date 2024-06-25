@@ -1476,6 +1476,10 @@ def find_resolution_mapping(G_micro, dist, depth=4,
     for res in resolution_range:
 
         labs_res = nx.community.louvain_communities(G, resolution=res)
+        # print('labs_res')
+        # print(labs_res)
+
+    
         labs_res = np.array([item for subset in labs_res for item in subset])
 
         # print(labs_res)
@@ -1494,7 +1498,8 @@ def find_resolution_mapping(G_micro, dist, depth=4,
 
     if depth == 0:
         ind = np.argmax(resolution_ei)
-        return resolution_ei[ind], resolution_mappings[ind]
+        resolution = resolution_range[ind]
+        return resolution, resolution_ei[ind], resolution_mappings[ind]
 
     else:
         if resolution_ei[1] >= resolution_ei[2] and resolution_ei[1] >= resolution_ei[0]:
@@ -1554,7 +1559,7 @@ def causal_emergence_louvain(G, check_inacc=False, t=500):
 
     dist = construct_distance_matrix(G_micro)
 
-    EI_macro, macro_mapping = find_resolution_mapping(G_micro, dist)
+    resolution, EI_macro, macro_mapping = find_resolution_mapping(G_micro, dist)
 
     macro_types = {i: 'spatem1' for i, j in macro_mapping.items() if i != j}
 
@@ -1570,6 +1575,7 @@ def causal_emergence_louvain(G, check_inacc=False, t=500):
     CE['G_macro'] = G_macro
     CE['G_micro'] = G_micro
     CE['mapping'] = macro_mapping
+    CE['resolution'] = resolution
     CE['macro_types'] = macro_types
     CE['EI_micro'] = EI_micro
     CE['EI_macro'] = EI_macro
