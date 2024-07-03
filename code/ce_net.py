@@ -1269,7 +1269,7 @@ def construct_distance_matrix(G_micro, nonz=1e-3, dist_add=1e3):
 
 
 def find_epsilon_mapping(reach, core, order, G_micro, depth=4,
-                         min_ep=1e-4, max_ep=9.99e-1, scale=1e-4):
+                         min_ep=1e-4, max_ep=9.99e-1, scale=0):
     r"""
     Binary search down the tree of possible epsilon values for finding the one
     that returns a macroscale mapping that maximizes the effective information
@@ -1309,10 +1309,13 @@ def find_epsilon_mapping(reach, core, order, G_micro, depth=4,
     epsilon_ei = []
     epsilon_range = np.linspace(min_ep, max_ep, 3)
     epsilon_mappings = []
+    
+    # print("epsilon_range = ", epsilon_range)
 
     for eps in epsilon_range:
 
         # labs_e = cluster_optics_dbscan(reach, core, order, eps)
+        # print("eps = ", eps)
         labs_e = cluster_optics_dbscan(reachability=reach, core_distances=core, ordering=order, eps=eps)
 
         macro_mapping_e = {i: i if lab == -1 else (len(labs_e)+lab)
@@ -1326,6 +1329,8 @@ def find_epsilon_mapping(reach, core, order, G_micro, depth=4,
         EI_macro_e = effective_information(G_macro_e)
         epsilon_ei.append(EI_macro_e)
         epsilon_mappings.append(macro_mapping_e)
+
+    print("epsilon_ei = ", epsilon_ei)
 
     if depth == 0:
         ind = np.argmax(epsilon_ei)
@@ -1386,6 +1391,7 @@ def causal_emergence_spectral(G, check_inacc=False, t=500):
 
     G_micro = check_network(G)
     EI_micro = effective_information(G_micro)
+    print("EI_micro = ", EI_micro)
 
     dist = construct_distance_matrix(G_micro)
 
@@ -1399,6 +1405,8 @@ def causal_emergence_spectral(G, check_inacc=False, t=500):
     order = optics.ordering_
 
     EI_macro, macro_mapping = find_epsilon_mapping(reach, core, order, G_micro)
+
+    print("EI_macro = ", EI_macro)
 
     macro_types = {i: 'spatem1' for i, j in macro_mapping.items() if i != j}
 
@@ -1430,7 +1438,7 @@ def causal_emergence_spectral(G, check_inacc=False, t=500):
 import networkx as nx
 
 def find_resolution_mapping(G_micro, dist, depth=4,
-                         min_res=0.01, max_res=2, scale=0.01):
+                         min_res=0.01, max_res=5, scale=0.01):
     r"""
     Binary search down the tree of possible epsilon values for finding the one
     that returns a macroscale mapping that maximizes the effective information
@@ -1440,9 +1448,6 @@ def find_resolution_mapping(G_micro, dist, depth=4,
     G_micro, the original graph.
 
     Algorithm adapted from the paper:
-        Mihael Ankerst. Markus M. Breunig, Hans-Peter Kriegel, & Jörg Sander
-        “OPTICS: Ordering points to identify the clustering structure”.
-        Proc. ACM SIGMOD’99 Int. Conf. on Management of Data. ACM Press, 1999
 
     Development work contributed by Ross Griebenow.
         email: rossgriebenow at gmail dot com
